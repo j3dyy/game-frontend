@@ -6,5 +6,5 @@
 window.APP_CONFIG = {
   API_BASE: window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
     ? "http://127.0.0.1:8000/api"
-    : "https://YOUR_USECTL_BACKEND_APP.usectl.app/api"
+    : "https://rpg-api.usectl.com/api"
 };
