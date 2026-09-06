@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dungeon Chronicles: Realm of Shadows</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;900&family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body>
+  <!-- Header Bar -->
+  <header class="game-header">
+    <div class="brand">
+      <span class="brand-icon">⚔️</span>
+      <div class="brand-text">
+        <h1>DUNGEON CHRONICLES</h1>
+        <span class="subtitle">Decoupled RPG • Server Authoritative</span>
+      </div>
+    </div>
+
+    <div class="header-status">
+      <div class="floor-badge">
+        <span class="label">CURRENT FLOOR</span>
+        <span class="value" id="header-floor">Floor 1</span>
+      </div>
+      <div class="server-status" id="server-status">
+        <span class="status-indicator"></span>
+        <span class="status-label" id="status-text">Connecting to API...</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Notification Toast Container -->
+  <div id="toast-container" class="toast-container"></div>
+
+  <!-- Main Game Layout (3 Columns) -->
+  <main class="game-container">
+    
+    <!-- LEFT COLUMN: Character, Attributes & Equipment -->
+    <aside class="panel character-panel">
+      <!-- Profile & Vitals -->
+      <section class="card profile-card">
+        <div class="profile-header">
+          <div class="avatar-frame">
+            <span class="avatar-icon">🧙‍♂️</span>
+          </div>
+          <div class="profile-info">
+            <div class="name-row">
+              <h2 id="char-name" class="char-name">Hero</h2>
+              <span id="char-level" class="badge-level">Lv. 1</span>
+            </div>
+            <div class="gold-counter">
+              <span class="gold-icon">🪙</span>
+              <span id="char-gold" class="gold-value">50</span>
+              <span class="gold-label">Gold</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Health Bar -->
+        <div class="vital-row">
+          <div class="vital-label-row">
+            <span class="vital-name">Health (HP)</span>
+            <span class="vital-numbers" id="hp-numbers">50 / 50</span>
+          </div>
+          <div class="progress-bar-track hp-track">
+            <div id="hp-bar-fill" class="progress-bar-fill hp-fill" style="width: 100%;"></div>
+          </div>
+        </div>
+
+        <!-- XP Bar -->
+        <div class="vital-row">
+          <div class="vital-label-row">
+            <span class="vital-name">Experience (XP)</span>
+            <span class="vital-numbers" id="xp-numbers">0 / 100</span>
+          </div>
+          <div class="progress-bar-track xp-track">
+            <div id="xp-bar-fill" class="progress-bar-fill xp-fill" style="width: 0%;"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Attributes / Stats Allocation -->
+      <section class="card stats-card">
+        <div class="card-header-with-badge">
+          <h3>Attributes</h3>
+          <div id="free-points-badge" class="free-points-badge hidden">
+            <span class="sparkle">✨</span>
+            <span id="free-points-text">5 Points</span>
+          </div>
+        </div>
+
+        <div class="stats-list">
+          <!-- STR -->
+          <div class="stat-row" data-stat="str">
+            <div class="stat-meta">
+              <span class="stat-name">STR <small>Strength</small></span>
+              <span class="stat-detail">Attack: <span id="stat-atk-hint">+10</span></span>
+            </div>
+            <div class="stat-values-group">
+              <span class="stat-total" id="stat-str">5</span>
+              <span class="stat-bonus" id="bonus-str">(+0)</span>
+              <button class="btn-allocate hidden" id="btn-alloc-str" title="Increase STR by 1">+</button>
+            </div>
+          </div>
+
+          <!-- AGI -->
+          <div class="stat-row" data-stat="agi">
+            <div class="stat-meta">
+              <span class="stat-name">AGI <small>Agility</small></span>
+              <span class="stat-detail">Dodge &amp; Crit Chance</span>
+            </div>
+            <div class="stat-values-group">
+              <span class="stat-total" id="stat-agi">5</span>
+              <span class="stat-bonus" id="bonus-agi">(+0)</span>
+              <button class="btn-allocate hidden" id="btn-alloc-agi" title="Increase AGI by 1">+</button>
+            </div>
+          </div>
+
+          <!-- VIT -->
+          <div class="stat-row" data-stat="vit">
+            <div class="stat-meta">
+              <span class="stat-name">VIT <small>Vitality</small></span>
+              <span class="stat-detail">Health: <span id="stat-hp-hint">+50 HP</span></span>
+            </div>
+            <div class="stat-values-group">
+              <span class="stat-total" id="stat-vit">5</span>
+              <span class="stat-bonus" id="bonus-vit">(+0)</span>
+              <button class="btn-allocate hidden" id="btn-alloc-vit" title="Increase VIT by 1">+</button>
+            </div>
+          </div>
+
+          <!-- INT -->
+          <div class="stat-row" data-stat="int">
+            <div class="stat-meta">
+              <span class="stat-name">INT <small>Intelligence</small></span>
+              <span class="stat-detail">Healing Potency</span>
+            </div>
+            <div class="stat-values-group">
+              <span class="stat-total" id="stat-int">5</span>
+              <span class="stat-bonus" id="bonus-int">(+0)</span>
+              <button class="btn-allocate hidden" id="btn-alloc-int" title="Increase INT by 1">+</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Derived Combat Ratings -->
+        <div class="derived-stats-grid">
+          <div class="derived-item">
+            <span class="derived-label">Attack Power</span>
+            <span class="derived-value" id="derived-attack">10</span>
+          </div>
+          <div class="derived-item">
+            <span class="derived-label">Dodge Chance</span>
+            <span class="derived-value" id="derived-dodge">2.5%</span>
+          </div>
+          <div class="derived-item">
+            <span class="derived-label">Crit Chance</span>
+            <span class="derived-value" id="derived-crit">2.0%</span>
+          </div>
+          <div class="derived-item">
+            <span class="derived-label">Max Health</span>
+            <span class="derived-value" id="derived-maxhp">50</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Equipment Slots -->
+      <section class="card equipment-card">
+        <h3>Equipped Gear</h3>
+        
+        <!-- Weapon Slot -->
+        <div class="equip-slot-container">
+          <span class="slot-type-label">🗡️ Main Hand (Weapon)</span>
+          <div id="equipped-weapon-slot" class="equip-slot-box empty">
+            <div class="slot-placeholder">No weapon equipped</div>
+          </div>
+        </div>
+
+        <!-- Armor Slot -->
+        <div class="equip-slot-container">
+          <span class="slot-type-label">🛡️ Body (Armor)</span>
+          <div id="equipped-armor-slot" class="equip-slot-box empty">
+            <div class="slot-placeholder">No armor equipped</div>
+          </div>
+        </div>
+      </section>
+    </aside>
+
+    <!-- CENTER COLUMN: Dungeon Arena & Combat Chronicle -->
+    <section class="panel dungeon-panel">
+      <!-- Arena / Battle Stage -->
+      <div class="card arena-card">
+        <div class="dungeon-banner">
+          <div class="floor-marker">
+            <span class="depth-tag">DEPTH</span>
+            <h2 id="dungeon-floor-title">Floor 1 - The Shadow Crypts</h2>
+          </div>
+          <div class="highest-marker">
+            <span class="sub">Deepest Delve:</span>
+            <strong id="dungeon-highest-floor">Floor 1</strong>
+          </div>
+        </div>
+
+        <!-- Peaceful / Exploration Mode View -->
+        <div id="explore-view" class="arena-view explore-view">
+          <div class="explore-art">
+            <div class="portal-circle">
+              <span class="portal-emoji">🚪</span>
+            </div>
+          </div>
+          <div class="explore-content">
+            <h3>Dungeon Gates Stand Open</h3>
+            <p>Monsters lurk in the dark corridors ahead. Defeat them to seize gold, discover rare enchanted loot, and delve deeper.</p>
+            <button id="btn-enter-dungeon" class="btn-cta btn-pulse">
+              <span class="cta-icon">⚔️</span>
+              <span class="cta-text">Enter Dungeon</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Active Battle View -->
+        <div id="battle-view" class="arena-view battle-view hidden">
+          <div class="enemy-card">
+            <div class="enemy-header">
+              <div class="enemy-avatar">
+                <span class="enemy-emoji" id="enemy-emoji">👹</span>
+              </div>
+              <div class="enemy-info">
+                <div class="enemy-title-row">
+                  <h3 id="enemy-name" class="enemy-name">Skeleton Warrior</h3>
+                  <span id="enemy-level-badge" class="badge-enemy-level">Lv. 1</span>
+                </div>
+                <div class="enemy-rewards-hint">
+                  <span>Drops: <strong id="enemy-xp-hint">+25 XP</strong>, <strong id="enemy-gold-hint">+15 Gold</strong></span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Enemy Health Bar -->
+            <div class="vital-row enemy-hp-row">
+              <div class="vital-label-row">
+                <span class="vital-name">Enemy Health</span>
+                <span class="vital-numbers" id="enemy-hp-numbers">35 / 35</span>
+              </div>
+              <div class="progress-bar-track enemy-hp-track">
+                <div id="enemy-hp-bar-fill" class="progress-bar-fill enemy-hp-fill" style="width: 100%;"></div>
+              </div>
+            </div>
+
+            <div class="enemy-stats-row">
+              <span class="enemy-stat-pill">⚔️ Attack Power: <strong id="enemy-damage-val">8</strong></span>
+              <span class="enemy-stat-pill">✨ Chance of Loot: <strong>35%</strong></span>
+            </div>
+          </div>
+
+          <!-- Combat Action Buttons -->
+          <div class="combat-actions">
+            <button id="btn-action-attack" class="btn-combat btn-attack">
+              <span class="action-icon">⚔️</span>
+              <span class="action-text">Attack</span>
+              <small class="action-sub">Strike with active weapon</small>
+            </button>
+
+            <button id="btn-action-heal" class="btn-combat btn-heal">
+              <span class="action-icon">✨</span>
+              <span class="action-text">Magic Heal</span>
+              <small class="action-sub">Restores HP (Scale with INT)</small>
+            </button>
+
+            <button id="btn-action-flee" class="btn-combat btn-flee">
+              <span class="action-icon">🏃💨</span>
+              <span class="action-text">Flee</span>
+              <small class="action-sub">Retreat to safe floor camp</small>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Chronicle / Combat Log -->
+      <div class="card log-card">
+        <div class="log-header">
+          <div class="log-title">
+            <span class="icon">📜</span>
+            <h3>Chronicle of Combat</h3>
+          </div>
+          <button id="btn-clear-log" class="btn-subtle" title="Clear log entries">Clear</button>
+        </div>
+        <div id="combat-log" class="combat-log">
+          <div class="log-entry log-system">
+            <span class="log-time">[System]</span> Welcome, brave warrior. Prepare yourself before venturing into the abyss.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- RIGHT COLUMN: Town Shop & Inventory -->
+    <aside class="panel shop-inventory-panel">
+      <!-- Town Shop Card -->
+      <section class="card shop-card">
+        <div class="card-header-with-badge">
+          <h3>Town Sanctuary</h3>
+          <span class="shop-badge">Merchant</span>
+        </div>
+        
+        <div class="shop-items-grid">
+          <!-- Potion Offer -->
+          <div class="shop-item">
+            <div class="shop-item-icon">🍷</div>
+            <div class="shop-item-details">
+              <div class="shop-item-name">Health Potion</div>
+              <div class="shop-item-desc">Restores <strong>30 HP</strong> instantly</div>
+            </div>
+            <button id="btn-buy-potion" class="btn-buy" title="Drink Health Potion for 15 Gold">
+              <span class="cost-gold">🪙 15</span>
+              <span class="buy-label">Buy</span>
+            </button>
+          </div>
+
+          <!-- Inn Rest Offer -->
+          <div class="shop-item">
+            <div class="shop-item-icon">🛌</div>
+            <div class="shop-item-details">
+              <div class="shop-item-name">Rest at Inn</div>
+              <div class="shop-item-desc">Fully restores <strong>Max HP</strong></div>
+            </div>
+            <button id="btn-rest-inn" class="btn-buy" title="Rest peacefully for 25 Gold">
+              <span class="cost-gold">🪙 25</span>
+              <span class="buy-label">Rest</span>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Inventory Backpack -->
+      <section class="card inventory-card">
+        <div class="card-header-with-badge">
+          <h3>Backpack</h3>
+          <span id="inventory-count-badge" class="inventory-count-badge">2 Items</span>
+        </div>
+
+        <div id="inventory-list" class="inventory-list">
+          <!-- Inventory items injected dynamically via app.js -->
+        </div>
+      </section>
+    </aside>
+
+  </main>
+
+  <!-- Load Config first, then Main App Script -->
+  <script src="config.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
